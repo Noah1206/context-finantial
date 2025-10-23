@@ -1,0 +1,267 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { fetchNews } from '@/lib/api'
+import TradingViewChart from '@/components/TradingViewChart'
+
+export default function Dashboard() {
+  const [news, setNews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadNews()
+  }, [])
+
+  const loadNews = async () => {
+    try {
+      const data = await fetchNews(20)
+      setNews(data)
+    } catch (error) {
+      console.error('Failed to load news:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getScoreColor = (score: number) => {
+    if (score >= 4) return 'bg-red-100 text-red-700 border-red-300'
+    if (score >= 3) return 'bg-yellow-100 text-yellow-700 border-yellow-300'
+    return 'bg-green-100 text-green-700 border-green-300'
+  }
+
+  const getScoreBadge = (score: number) => {
+    if (score >= 4) return { label: 'High Impact', emoji: '🔥', color: 'bg-red-500' }
+    if (score >= 3) return { label: 'Medium Impact', emoji: '⚡', color: 'bg-yellow-500' }
+    return { label: 'Low Impact', emoji: '📊', color: 'bg-green-500' }
+  }
+
+  // Mock data for market stats
+  const marketStats = [
+    { label: 'S&P 500', value: '4,783.45', change: '+0.85%', isPositive: true },
+    { label: 'Nasdaq', value: '15,011.35', change: '+1.23%', isPositive: true },
+    { label: 'Dow Jones', value: '37,545.33', change: '+0.43%', isPositive: true },
+    { label: 'VIX', value: '13.45', change: '-2.15%', isPositive: false },
+  ]
+
+  const trendingStocks = [
+    { ticker: 'NVDA', name: 'NVIDIA', price: '$495.22', change: '+5.67%', isPositive: true },
+    { ticker: 'TSLA', name: 'Tesla', price: '$248.50', change: '+3.21%', isPositive: true },
+    { ticker: 'AAPL', name: 'Apple', price: '$185.92', change: '+1.85%', isPositive: true },
+    { ticker: 'MSFT', name: 'Microsoft', price: '$378.91', change: '+2.14%', isPositive: true },
+    { ticker: 'META', name: 'Meta', price: '$352.68', change: '-1.23%', isPositive: false },
+    { ticker: 'GOOGL', name: 'Alphabet', price: '$141.80', change: '+0.95%', isPositive: true },
+  ]
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Header */}
+      <header className="bg-black border-b-2 border-slate-800 shadow-lg">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-white">📈 Stock News Dashboard</h1>
+            <div className="flex gap-4">
+              <a href="/charts" className="px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-slate-200 border-2 border-white">
+                📊 Charts
+              </a>
+              <a href="/watchlist" className="px-4 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-700 border-2 border-slate-600">
+                ⭐ Watchlist
+              </a>
+              <a href="/settings" className="px-4 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-700 border-2 border-slate-600">
+                ⚙️ Settings
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {/* Market Statistics */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-3xl font-bold text-white">📈 Market Snapshot</h2>
+            <span className="text-sm text-slate-400 font-medium">Real-time data</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {marketStats.map((stat, idx) => (
+              <div key={idx} className="bg-black border-2 border-slate-700 rounded-lg p-4 hover:shadow-xl hover:border-blue-500 transition">
+                <div className="text-sm text-slate-400 font-medium mb-1">{stat.label}</div>
+                <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                <div className={`text-sm font-semibold ${stat.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                  {stat.change} {stat.isPositive ? '↗' : '↘'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trending Stocks */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-3xl font-bold text-white">🔥 Trending Stocks</h2>
+            <span className="text-sm text-slate-400 font-medium">Most active today</span>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
+            {trendingStocks.map((stock, idx) => (
+              <div key={idx} className="bg-black border-2 border-slate-700 rounded-lg p-4 hover:shadow-xl hover:border-blue-500 transition">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <div className="text-xl font-bold text-white">{stock.ticker}</div>
+                    <div className="text-sm text-slate-400">{stock.name}</div>
+                  </div>
+                  <div className={`px-2 py-1 rounded-lg text-xs font-bold ${stock.isPositive ? 'bg-green-900 text-green-300 border border-green-700' : 'bg-red-900 text-red-300 border border-red-700'}`}>
+                    {stock.change}
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-blue-400">{stock.price}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Market Overview Charts */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-bold text-white">📊 Market Charts</h2>
+              <span className="text-sm text-slate-400 font-medium">S&P 500 & Nasdaq tracking</span>
+            </div>
+            <a
+              href="/charts"
+              className="px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition shadow-lg flex items-center gap-2 border-2 border-white"
+            >
+              📈 Professional Charts
+              <span className="text-sm">→</span>
+            </a>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="relative group">
+              <TradingViewChart symbol="SPY" height="400" />
+              <a
+                href="/charts"
+                className="absolute bottom-4 right-4 px-4 py-2 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition shadow-lg opacity-0 group-hover:opacity-100 z-10 border-2 border-white"
+              >
+                View Full Chart →
+              </a>
+            </div>
+            <div className="relative group">
+              <TradingViewChart symbol="QQQ" height="400" />
+              <a
+                href="/charts"
+                className="absolute bottom-4 right-4 px-4 py-2 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition shadow-lg opacity-0 group-hover:opacity-100 z-10 border-2 border-white"
+              >
+                View Full Chart →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Latest News Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-bold text-white">📰 Latest News</h2>
+              <span className="px-3 py-1 bg-blue-900 text-blue-300 rounded-full text-sm font-semibold border border-blue-700">
+                {news.length} Articles
+              </span>
+            </div>
+            <button className="px-4 py-2 bg-white text-black font-semibold rounded-lg hover:bg-slate-200 transition shadow-lg border-2 border-white">
+              🔄 Refresh News
+            </button>
+          </div>
+          <p className="text-slate-300 font-medium">AI-powered summaries with impact scoring</p>
+        </div>
+
+        {/* News Feed */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-500 mb-4"></div>
+            <div className="text-slate-300 font-semibold">Loading news...</div>
+          </div>
+        ) : news.length === 0 ? (
+          <div className="bg-black rounded-lg border-2 border-slate-700 p-12 text-center">
+            <div className="text-6xl mb-4">📰</div>
+            <h3 className="text-2xl font-bold text-white mb-2">No news yet</h3>
+            <p className="text-slate-400 mb-6">
+              News will appear here once the scraper runs
+            </p>
+            <button className="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-slate-200 transition shadow-lg border-2 border-white">
+              Fetch News Now
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {news.map((item: any, idx: number) => {
+              const badge = getScoreBadge(item.impact_score || 3)
+              return (
+                <div key={idx} className="bg-black rounded-xl border-2 border-slate-700 p-6 hover:shadow-2xl hover:border-blue-500 transition-all">
+                  {/* Header with Stock Badge and Impact Score */}
+                  <div className="flex justify-between items-start mb-5">
+                    <div className="flex items-center gap-3 flex-1">
+                      {item.stocks?.ticker && (
+                        <span className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg text-base shadow-md">
+                          {item.stocks.ticker}
+                        </span>
+                      )}
+                      <h3 className="text-2xl font-bold text-white leading-tight flex-1">{item.title}</h3>
+                    </div>
+                    {item.impact_score && (
+                      <div className="flex flex-col items-end gap-2 ml-4">
+                        <span className={`px-4 py-2 rounded-lg text-sm font-bold border-2 shadow-md ${getScoreColor(item.impact_score)}`}>
+                          {badge.emoji} {badge.label}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <span key={i} className={`text-2xl ${i < item.impact_score ? 'text-yellow-400' : 'text-slate-800'}`}>
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Summary */}
+                  {item.summary && (
+                    <div className="mb-5 bg-slate-950 rounded-lg p-4 border border-slate-700">
+                      <p className="text-slate-200 leading-relaxed text-lg">{item.summary}</p>
+                    </div>
+                  )}
+
+                  {/* Footer with metadata */}
+                  <div className="flex justify-between items-center pt-4 border-t-2 border-slate-800">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-bold text-blue-400 flex items-center gap-2">
+                        📡 {item.source}
+                      </span>
+                      {item.stocks?.company_name && (
+                        <span className="text-sm text-slate-400">
+                          {item.stocks.company_name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {item.published_at && (
+                        <span className="text-sm text-slate-400 font-medium">
+                          🕐 {new Date(item.published_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      )}
+                      <button className="px-4 py-2 bg-white text-black text-sm font-bold rounded-lg hover:bg-slate-200 transition shadow-lg border-2 border-white">
+                        Read More →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
