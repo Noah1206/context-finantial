@@ -378,7 +378,7 @@ export default function NewsDetailPage() {
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-8">
                 <div className="text-[13px] text-white/50 mb-6 uppercase tracking-wider">Article</div>
                 <div className="space-y-4">
-                  {fullArticle.split('\n\n').map((paragraph, idx) => (
+                  {fullArticle.split('\n\n').map((paragraph: string, idx: number) => (
                     <p key={idx} className="text-[14px] text-white/70 leading-relaxed">
                       {highlightText(paragraph)}
                     </p>
